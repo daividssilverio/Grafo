@@ -1,8 +1,7 @@
-import javax.swing.*;
+package grafo;
+
 import java.io.*;
 import java.util.*;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,32 +14,35 @@ public class Grafo {
     private int qtVertices;
     private final String datasets = "datasets" + File.separator;
     HashMap<Integer, String> chaveVertice;
-    HashMap<String, HashSet<String>> verticeArestas;
+    List<Componente> componentes;
 
     public Grafo(String nomeArquivo) {
         chaveVertice = new HashMap<Integer, String>();
-        verticeArestas = new HashMap<String, HashSet<String>>();
+        componentes = new ArrayList<Componente>();
         lerDeArquivo(nomeArquivo);
     }
 
     public static void main(String args[]) throws FileNotFoundException {
         Grafo g = new Grafo("Wiki-Vote.txt");
 
-        for (Integer i : g.chaveVertice.keySet()) {
-            String v = g.chaveVertice.get(i);
-            System.out.println(i + " : " + v);
-            HashSet<String> set = g.verticeArestas.get(v);
-
-            for (String s: set) {
-                System.out.println("\t|" + s);
+        int i = 0;
+        int size = 0;
+        for (Componente c : g.componentes) {
+            System.out.println(i++);
+            size += c.getVertices().size();
+            for (String s : c.getVertices()) {
+                System.out.println("\t-" + s);
+                for (String v : c.getLigacoesVertice(s))
+                    System.out.println("\t|" + v);
+                System.out.println();
             }
-
-            System.out.println();
         }
-        System.out.println(g.qtVertices);
+
+        System.out.println(g.qtVertices + ", " + size);
     }
 
     private void lerDeArquivo(String nomeDoArquivo) {
+        Map<String, Set<String>> verticeArestas = new HashMap<String, Set<String>>();
 
         try {
             Scanner scanner = new Scanner(new File(datasets + nomeDoArquivo));
@@ -73,6 +75,8 @@ public class Grafo {
             }
 
             scanner.close();
+
+            componentes = Util.separaGrafo(verticeArestas);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
